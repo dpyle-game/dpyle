@@ -94,7 +94,7 @@ function dailySeed() {
     return now.getDate() + now.getMonth() * 32 + now.getFullYear() * 400;
 }
 function getAnswer() {
-    return answers[Math.floor((new Date() - new Date(Date.UTC(2022, 2, 3)) / (1000*60*60*24)) % answers.length];
+    return answers[Math.floor((new Date() - new Date(Date.UTC(2022, 2, 3))) / (1000*60*60*24)) % answers.length];
 }
 function save() {
     localStorage.setItem("diffle_play", JSON.stringify(play));
