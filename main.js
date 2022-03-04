@@ -89,10 +89,6 @@ const $inputRow = assure(document.getElementById("input_row"), HTMLDivElement);
 const $board = assure(document.getElementById("board"), HTMLDivElement);
 let play;
 let stats;
-function dailySeed() {
-    const now = new Date();
-    return now.getDate() + now.getMonth() * 32 + now.getFullYear() * 400;
-}
 function getAnswer() {
     return answers[Math.floor((new Date() - new Date(Date.UTC(2022, 2, 3))) / (1000*60*60*24)) % answers.length];
 }
@@ -337,7 +333,7 @@ Array.from("qwertyuiopasdfghjklzxcvbnm").forEach(letter => {
 });
 function getTodayString() {
     const now = new Date();
-    return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    return `${now.getUTCFullYear()}-${now.getUTCMonth() + 1}-${now.getUTCDate()}`;
 }
 function updateTimer() {
     const today = getTodayString();
@@ -346,7 +342,7 @@ function updateTimer() {
         return;
     }
     const now = new Date();
-    const rest = 86400 - (3600 * now.getHours() + 60 * now.getMinutes() + now.getSeconds());
+    const rest = 86400 - (3600 * now.getUTCHours() + 60 * now.getUTCMinutes() + now.getUTCSeconds());
     const rest_hours = Math.floor(rest / 3600);
     const rest_minutes = Math.floor((rest - 3600 * rest_hours) / 60);
     const rest_seconds = rest - 3600 * rest_hours - 60 * rest_minutes;
