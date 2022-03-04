@@ -316,7 +316,7 @@ h2 {
     align-items: center;
 }
 
-#share_button, #share_image_button  {
+#share_image_button  {
     background-color: #4fb061;
     color: white;
     font-family: inherit;
@@ -334,9 +334,6 @@ h2 {
     font-size: 20px;
     margin: 0 1rem;
     height: 52px;
-}
-#share_image_button {
-    width: 52px;
 }
 
 #help, #stats{

@@ -246,17 +246,6 @@ function myAlert(message) {
     alert.classList.add("visible");
     setTimeout(() => alert.classList.remove("visible"), 1500);
 }
-function share() {
-    const title = "Esolangle " + play.date + "\n";
-    const result = play.history.length + (play.history.length <= 1 ? " word / " : " words / ") + play.letter_count + " letters\n\n";
-    const pattern = play.history.map((x, i) => diffle(play.answer, x).pattern.map(y => i == play.history.length - 1 ? "\ud83d\udfe9" : y == 0 ? "\u26AA" : y == 1 ? "\ud83d\udfe1" : "\ud83d\udfe2").join("")).join("\n");
-    const url = location.href;
-    navigator.clipboard.writeText(title + result + pattern + "\n\n" + url).then(function () {
-        myAlert('Copyed results to clipboard');
-    }).catch(function (error) {
-        myAlert(error.message);
-    });
-}
 function shareImage() {
     const width = 500;
     const circle_radius = 21;
@@ -351,7 +340,6 @@ function updateTimer() {
 }
 assure(document.getElementById("keyboard_enter"), HTMLButtonElement).addEventListener("click", enter);
 assure(document.getElementById("keyboard_backspace"), HTMLButtonElement).addEventListener("click", inputBackspace);
-assure(document.getElementById("share_button"), HTMLButtonElement).addEventListener("click", share);
 assure(document.getElementById("share_image_button"), HTMLButtonElement).addEventListener("click", shareImage);
 load();
 setInterval(updateTimer, 1000);
