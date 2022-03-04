@@ -93,21 +93,8 @@ function dailySeed() {
     const now = new Date();
     return now.getDate() + now.getMonth() * 32 + now.getFullYear() * 400;
 }
-function getAnswer(seed) {
-    if (seed == 808836)
-        return "differ";
-    let x = 123456789;
-    let y = 362436069;
-    let z = 521288629;
-    let w = seed;
-    for (let i = 0; i < 1024; i++) {
-        let t = x ^ (x << 11);
-        x = y;
-        y = z;
-        z = w;
-        w = (w ^ (w >>> 19)) ^ (t ^ (t >>> 8));
-    }
-    return answers[Math.abs(w) % answers.length];
+function getAnswer() {
+    return answers[Math.floor((new Date() - new Date(Date.UTC(2022, 2, 3)) / (1000*60*60*24)) % answers.length];
 }
 function save() {
     localStorage.setItem("diffle_play", JSON.stringify(play));
@@ -133,7 +120,7 @@ function load() {
     if (_play && _play.date == today) {
         play = _play;
         if (play.answer == undefined)
-            play.answer = getAnswer(dailySeed());
+            play.answer = getAnswer();
         play.history.forEach(x => insertGuess(x));
         Array.from(play.guess).forEach(x => insertLetter(x));
         if (play.history[play.history.length - 1] == play.answer)
@@ -144,7 +131,7 @@ function load() {
             date: today,
             guess: "",
             history: [],
-            answer: getAnswer(dailySeed()),
+            answer: getAnswer(),
             letter_count: 0,
         };
         save();
@@ -264,7 +251,7 @@ function myAlert(message) {
     setTimeout(() => alert.classList.remove("visible"), 1500);
 }
 function share() {
-    const title = "Diffle " + play.date + "\n";
+    const title = "Esolangle " + play.date + "\n";
     const result = play.history.length + (play.history.length <= 1 ? " word / " : " words / ") + play.letter_count + " letters\n\n";
     const pattern = play.history.map((x, i) => diffle(play.answer, x).pattern.map(y => i == play.history.length - 1 ? "\ud83d\udfe9" : y == 0 ? "\u26AA" : y == 1 ? "\ud83d\udfe1" : "\ud83d\udfe2").join("")).join("\n");
     const url = location.href;
@@ -290,7 +277,7 @@ function shareImage() {
     context.fillStyle = "#1a1a1b";
     context.font = "40px 'HK Super Round Bold'";
     context.textAlign = "center";
-    context.fillText("Diffle".split("").join(String.fromCharCode(8202)), width / 2, 40);
+    context.fillText("Esolangle".split("").join(String.fromCharCode(8202)), width / 2, 40);
     context.font = "20px 'HK Super Round Bold'";
     context.textAlign = "center";
     context.fillText(play.date, width / 2, 65);
