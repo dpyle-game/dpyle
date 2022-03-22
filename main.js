@@ -175,8 +175,6 @@ function inputLetter(letter) {
         return;
     if (!/^[a-z]$/.test(letter))
         throw new Error("invalid input");
-    if (10 <= play.guess.length)
-        return;
     insertLetter(letter);
     play.guess += letter;
     save();
