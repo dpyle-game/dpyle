@@ -90,7 +90,7 @@ const $board = assure(document.getElementById("board"), HTMLDivElement);
 let play;
 let stats;
 function getAnswer() {
-    return answers[Math.floor((new Date() - new Date(Date.UTC(2022, 2, 3))) / (1000*60*60*24)) % answers.length];
+    return answers[Math.floor((new Date() - new Date(Date.UTC(2022, 2, 23))) / (1000*60*60*24)) % answers.length];
 }
 function save() {
     localStorage.setItem("diffle_play", JSON.stringify(play));
@@ -173,7 +173,7 @@ function insertGuess(guess) {
 function inputLetter(letter) {
     if (play.history[play.history.length - 1] == play.answer)
         return;
-    if (!/^[a-z]$/.test(letter))
+    if (!/^[a-z_]$/.test(letter))
         throw new Error("invalid input");
     insertLetter(letter);
     play.guess += letter;
@@ -193,7 +193,7 @@ function inputBackspace() {
 function enter() {
     if (play.history[play.history.length - 1] == play.answer)
         return;
-    if (!allowed.includes(play.guess)) {
+    if (!answers.includes(play.guess)) {
         myAlert("not in word list");
         return;
     }
@@ -310,11 +310,11 @@ document.addEventListener("keydown", (ev) => {
     if (ev.key == "Backspace")
         inputBackspace();
     if (ev.key == "Enter")
-        enter();
-    if (/^[A-Za-z]$/.test(ev.key))
+        return enter();
+    if (/^[A-Za-z_]$/.test(ev.key))
         inputLetter(ev.key.toLowerCase());
 });
-Array.from("qwertyuiopasdfghjklzxcvbnm").forEach(letter => {
+Array.from("qwertyuiopasdfghjklzxcvbnm_").forEach(letter => {
     const keyboard_button = assure(document.getElementById("keyboard_" + letter), HTMLButtonElement);
     keyboard_button.addEventListener("click", () => inputLetter(letter));
 });
