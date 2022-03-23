@@ -260,7 +260,7 @@ function shareImage() {
     context.fillStyle = "#1a1a1b";
     context.font = "40px 'HK Super Round Bold'";
     context.textAlign = "center";
-    context.fillText("Esolangle".split("").join(String.fromCharCode(8202)), width / 2, 40);
+    context.fillText("Dpyle".split("").join(String.fromCharCode(8202)), width / 2, 40);
     context.font = "20px 'HK Super Round Bold'";
     context.textAlign = "center";
     context.fillText(play.date, width / 2, 65);
