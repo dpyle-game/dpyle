@@ -245,7 +245,7 @@ function myAlert(message) {
     setTimeout(() => alert.classList.remove("visible"), 1500);
 }
 function shareImage() {
-    const width = 500;
+    const width = 2000;
     const circle_radius = 21;
     const dot_radius = 4;
     const margin_x = 2;
