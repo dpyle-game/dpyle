@@ -1,49 +1,107 @@
-import discord
-from discord.ext import commands, tasks
-import inspect
+# Sphinx parsing from https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/api.py
+# This file is licensed under MPL 2.0 (see `update_words_license`)
+
+import requests
+import os
+import io
+import zlib
+import re
 import random
 import json
 
-def get_names(d):
-    try:
-        t = inspect.getsource(d)
-    except TypeError:
-        return
-    if hasattr(d, "__all__"):
-        yield from d.__all__
-        return
-    for name, m in inspect.getmembers(d, inspect.ismodule):
-        end = m.__name__.rsplit('.', 1)[-1]
-        if end not in t:
-            continue
-        yield end
-        try:
-            for n in m.__all__:
-                yield n.lower()
-                for name, _ in inspect.getmembers(getattr(m, n)):
-                    if name.startswith("_") or not any(map(str.islower, name)) or not all(x.isalpha() or x == "_" for x in name):
-                        continue
-                    yield name
-        except AttributeError:
-            yield from get_names(m)
+class SphinxObjectFileReader:
+    BUFSIZE = 16 * 1024
 
-l = []
-l.append("discord")
-l.extend(get_names(discord))
-l.append("ext")
-l.append("commands")
-l.extend(get_names(commands))
-l.append("tasks")
-l.extend(get_names(tasks))
-l = list(set(l))
-random.shuffle(l)
+    def __init__(self, buffer):
+        self.stream = io.BytesIO(buffer)
+
+    def readline(self):
+        return self.stream.readline().decode('utf-8')
+
+    def skipline(self):
+        self.stream.readline()
+
+    def read_compressed_chunks(self):
+        decompressor = zlib.decompressobj()
+        while True:
+            chunk = self.stream.read(self.BUFSIZE)
+            if len(chunk) == 0:
+                break
+            yield decompressor.decompress(chunk)
+        yield decompressor.flush()
+
+    def read_compressed_lines(self):
+        buf = b''
+        for chunk in self.read_compressed_chunks():
+            buf += chunk
+            pos = buf.find(b'\n')
+            while pos != -1:
+                yield buf[:pos].decode('utf-8')
+                buf = buf[pos + 1:]
+                pos = buf.find(b'\n')
+
+
+def parse_object_inv(stream, url):
+    result = {}
+
+    inv_version = stream.readline().rstrip()
+    if inv_version != '# Sphinx inventory version 2':
+        raise RuntimeError('Invalid objects.inv file version.')
+
+    projname = stream.readline().rstrip()[11:]
+    version = stream.readline().rstrip()[11:]
+
+    line = stream.readline()
+    if 'zlib' not in line:
+        raise RuntimeError('Invalid objects.inv file, not z-lib compatible.')
+
+    entry_regex = re.compile(r'(?x)(.+?)\s+(\S*:\S*)\s+(-?\d+)\s+(\S+)\s+(.*)')
+    for line in stream.read_compressed_lines():
+        match = entry_regex.match(line.rstrip())
+        if not match:
+            continue
+
+        name, directive, prio, location, dispname = match.groups()
+        domain, _, subdirective = directive.partition(':')
+        if directive == 'py:module' and name in result:
+            continue
+
+        if directive == 'std:doc':
+            subdirective = 'label'
+
+        if location.endswith('$'):
+            location = location[:-1] + name
+
+        key = name if dispname == '-' else dispname
+        prefix = f'{subdirective}:' if domain == 'std' else ''
+
+        if projname == 'discord.py':
+            key = key.replace('discord.ext.commands.', '').replace('discord.', '')
+
+        result[f'{prefix}{key}'] = os.path.join(url, location)
+
+    return result
+
+key = "master"
+page = "https://discordpy.readthedocs.io/en/master"
+resp = requests.get(page + "/objects.inv")
+stream = SphinxObjectFileReader(resp.content)
+obj = parse_object_inv(stream, page)
+
+words = set()
+for x in obj.keys():
+    for r in x.lower().rsplit("."):
+        if all(c.isalpha() or c == "_" for c in r):
+            words.add(r)
+words = list(words)
+random.shuffle(words)
 
 existing = ["slug"]
 for s in existing[::-1]:
-    l.remove(s)
-    l.insert(0, s)
+    words.remove(s)
+    words.insert(0, s)
 
 with open("data.js", "w") as f:
     f.write("const answers = ")
-    json.dump(l, f)
+    json.dump(words, f)
     f.write("\n")
