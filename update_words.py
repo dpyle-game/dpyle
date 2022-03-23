@@ -1,14 +1,20 @@
 import discord
+from discord.ext import commands, tasks
 import inspect
 import random
 import json
 
-t = inspect.getsource(discord)
-
 def get_names(d):
-    for _, m in inspect.getmembers(d, inspect.ismodule):
+    try:
+        t = inspect.getsource(d)
+    except TypeError:
+        return
+    if hasattr(d, "__all__"):
+        yield from d.__all__
+        return
+    for name, m in inspect.getmembers(d, inspect.ismodule):
         end = m.__name__.rsplit('.', 1)[-1]
-        if f"from .{end}" not in t:
+        if end not in t:
             continue
         yield end
         try:
@@ -21,9 +27,21 @@ def get_names(d):
         except AttributeError:
             yield from get_names(m)
 
-l = list(set(get_names(discord)))
+l = []
 l.append("discord")
+l.extend(get_names(discord))
+l.append("ext")
+l.append("commands")
+l.extend(get_names(commands))
+l.append("tasks")
+l.extend(get_names(tasks))
+l = list(set(l))
 random.shuffle(l)
+
+existing = ["slug"]
+for s in existing[::-1]:
+    l.remove(s)
+    l.insert(0, s)
 
 with open("data.js", "w") as f:
     f.write("const answers = ")
