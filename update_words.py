@@ -1,6 +1,7 @@
 # Sphinx parsing from https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/api.py
 # This file is licensed under MPL 2.0 (see `update_words_license`)
 
+import datetime
 import requests
 import os
 import io
@@ -93,15 +94,21 @@ for x in obj.keys():
     for r in x.lower().rsplit("."):
         if all(c.isalpha() or c == "_" for c in r):
             words.add(r)
-words = list(words)
-random.shuffle(words)
 
-existing = ["slug"]
-for s in existing[::-1]:
-    words.remove(s)
-    words.insert(0, s)
-
-with open("data.js", "w") as f:
-    f.write("const answers = ")
-    json.dump(words, f)
-    f.write("\n")
+if __name__ == "__main__":
+    words_to_write = []
+    prefix = "const answers = "
+    with open("data.js", "r+") as f:
+        current = eval(f.read().removeprefix(prefix))
+        day = (datetime.datetime.utcnow() - datetime.datetime(2022, 3, 23)).days
+        past = current[:day+1]
+        words_to_write.extend(past)
+        words -= set(past)
+        word_list = list(words)
+        random.shuffle(word_list)
+        words_to_write.extend(word_list)
+        f.seek(0)
+        f.truncate()
+        f.write(prefix)
+        json.dump(words_to_write, f)
+        f.write("\n")
