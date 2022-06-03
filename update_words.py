@@ -83,8 +83,8 @@ def parse_object_inv(stream, url):
 
     return result
 
-key = "master"
-page = "https://discordpy.readthedocs.io/en/master"
+key = "latest"
+page = "https://discordpy.readthedocs.io/en/latest"
 resp = requests.get(page + "/objects.inv")
 stream = SphinxObjectFileReader(resp.content)
 obj = parse_object_inv(stream, page)
